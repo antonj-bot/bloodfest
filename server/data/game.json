@@ -1,26 +1,139 @@
 {
-  "arena": {"w": 1600, "h": 900},
+  "arena": {
+    "w": 1600,
+    "h": 900
+  },
   "rounds_total": 10,
   "boss_every": 2,
-  "shop_seconds": 25,
-  "round_end_seconds": 4,
-  "results_seconds": 15,
-  "round_seconds": 150,
-  "storm": {"start_pct": 0.02, "growth_pct": 0.02, "growth_every_s": 10},
+  "shop_seconds": 12,
+  "round_end_seconds": 2,
+  "results_seconds": 8,
+  "round_seconds": 60,
   "start_gold": 300,
   "round_gold": 120,
   "max_items": 6,
-  "leveling": {"max_level": 15, "xp_per_level": 120, "hp": 60, "dmg": 4, "spell_power": 0.08},
+  "leveling": {
+    "max_level": 15,
+    "xp_per_level": 120,
+    "hp": 60,
+    "dmg": 4,
+    "spell_power": 0.08
+  },
   "rewards": {
-    "hero_kill": {"gold": 100, "gold_per_victim_level": 20, "xp": 110, "points": 2},
+    "hero_kill": {
+      "gold": 100,
+      "gold_per_victim_level": 20,
+      "xp": 110,
+      "points": 2
+    },
     "survivor_points": 3
   },
   "minion": {
-    "hp": 220, "dmg": 14, "armor": 1, "range": 40, "atk_cd": 1.2, "speed": 150, "radius": 14,
-    "aggro": 260, "leash": 500, "gold": 22, "xp": 35, "growth_per_round": 0.15
+    "hp": 220,
+    "dmg": 14,
+    "armor": 1,
+    "range": 40,
+    "atk_cd": 1.2,
+    "speed": 150,
+    "radius": 14,
+    "aggro": 260,
+    "leash": 500,
+    "gold": 22,
+    "xp": 35,
+    "growth_per_round": 0.15
   },
   "camps": {
-    "size": 3, "respawn_s": 25, "max_minions": 24,
-    "spots": [[250, 180], [800, 120], [1350, 180], [250, 720], [800, 780], [1350, 720]]
-  }
+    "size": 3,
+    "respawn_s": 25,
+    "max_minions": 24,
+    "spots": [
+      [
+        250,
+        180
+      ],
+      [
+        800,
+        120
+      ],
+      [
+        1350,
+        180
+      ],
+      [
+        250,
+        720
+      ],
+      [
+        800,
+        780
+      ],
+      [
+        1350,
+        720
+      ]
+    ]
+  },
+  "potions": {
+    "spawn_min_s": 10,
+    "spawn_max_s": 18,
+    "max_on_ground": 2,
+    "lifetime_s": 16,
+    "heal_pct": 0.25,
+    "minion_drop_chance": 0.06,
+    "pickup_pad": 18
+  },
+  "enemy_types": [
+    {
+      "id": "goblin",
+      "name": "Goblin Raider",
+      "weight": 35,
+      "hp_mult": 0.9,
+      "dmg_mult": 1.0,
+      "armor_add": 0,
+      "speed_mult": 1.12,
+      "range": 38,
+      "radius": 14,
+      "gold_mult": 0.9,
+      "xp_mult": 0.9
+    },
+    {
+      "id": "brute",
+      "name": "Ogre Brute",
+      "weight": 20,
+      "hp_mult": 1.8,
+      "dmg_mult": 1.35,
+      "armor_add": 4,
+      "speed_mult": 0.72,
+      "range": 50,
+      "radius": 21,
+      "gold_mult": 1.6,
+      "xp_mult": 1.5
+    },
+    {
+      "id": "archer",
+      "name": "Bone Archer",
+      "weight": 25,
+      "hp_mult": 0.72,
+      "dmg_mult": 1.15,
+      "armor_add": -1,
+      "speed_mult": 0.92,
+      "range": 300,
+      "radius": 13,
+      "gold_mult": 1.1,
+      "xp_mult": 1.15
+    },
+    {
+      "id": "wisp",
+      "name": "Chaos Wisp",
+      "weight": 20,
+      "hp_mult": 0.58,
+      "dmg_mult": 1.45,
+      "armor_add": -1,
+      "speed_mult": 1.45,
+      "range": 180,
+      "radius": 11,
+      "gold_mult": 1.25,
+      "xp_mult": 1.25
+    }
+  ]
 }

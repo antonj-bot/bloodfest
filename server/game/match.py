@@ -4,7 +4,7 @@ Rules:
   * Free-for-all. Every hero, the farmable minions and the boss are all hostile.
   * Every ``boss_every`` rounds a boss spawns; each boss is stronger than the last.
   * Dead = out until the round ends. A round ends when ALL heroes are dead.
-  * You may suicide. The storm guarantees a round can't last forever.
+  * You may suicide. Every round has a time limit; when it runs out, everyone still alive is out.
   * Most points after ``rounds_total`` rounds wins.
 """
 from __future__ import annotations
@@ -58,6 +58,7 @@ class Match:
         self._camps: list[dict] = []
         self._boss_name = ""
         self._alive_prev: set[str] = set()   # heroes alive at the end of the previous tick
+        self._full_warned: set[tuple[str, int]] = set()   # (player, pickup) pairs already told "pack is full"
 
     # ============================================================ lobby
     def add_player(self, pid: str, name: str, hero: str) -> Player:
@@ -125,7 +126,9 @@ class Match:
 
     def _begin_fight(self) -> None:
         g = self.g
-        w = World(g["arena"]["w"], g["arena"]["h"], g["round_seconds"], g["storm"], self.rng)
+        w = World(g["arena"]["w"], g["arena"]["h"], g["round_seconds"], self.rng,
+                  potion_cfg=g.get("potions"))
+        self._full_warned.clear()
         self.world = w
         self.phase, self.timer = FIGHT, 0.0
 
@@ -184,6 +187,7 @@ class Match:
             "speed": float(h["speed"]),
             "spell_power": 1.0 + lv["spell_power"] * bonus,
             "lifesteal": 0.0,
+            "basic_visual": {"pyro":"fire_bolt", "ranger":"arrow", "druid":"thorn", "artificer":"arc_bolt"}.get(p.hero, ""),
         }
         for item_id in p.items:
             for k, v in self.data.items[item_id]["stats"].items():
@@ -193,12 +197,18 @@ class Match:
                     s[k] += v
         return s
 
-    def minion_stats(self) -> dict:
+    def minion_stats(self, variant: dict | None = None) -> dict:
         m = self.g["minion"]
+        v = variant or {"id": "goblin", "hp_mult": 1, "dmg_mult": 1, "armor_add": 0,
+                        "speed_mult": 1, "range": m["range"], "radius": m["radius"],
+                        "gold_mult": 1, "xp_mult": 1}
         scale = 1.0 + m["growth_per_round"] * (self.round - 1)
-        return {"radius": float(m["radius"]), "max_hp": m["hp"] * scale, "dmg": m["dmg"] * scale,
-                "armor": float(m["armor"]), "atk_range": float(m["range"]), "atk_cd": float(m["atk_cd"]),
-                "speed": float(m["speed"]), "aggro": float(m["aggro"]), "leash": float(m["leash"])}
+        return {"radius": float(v["radius"]), "max_hp": m["hp"] * scale * v["hp_mult"],
+                "dmg": m["dmg"] * scale * v["dmg_mult"], "armor": max(0.0, m["armor"] + v["armor_add"]),
+                "atk_range": float(v["range"]), "atk_cd": float(m["atk_cd"]), "speed": m["speed"] * v["speed_mult"],
+                "aggro": float(m["aggro"]), "leash": float(m["leash"]), "variant": v["id"],
+                "basic_visual": "bone_arrow" if v["id"] == "archer" else "arc_bolt" if v["id"] == "wisp" else "",
+                "reward_mult": (v["gold_mult"] + v["xp_mult"]) / 2}
 
     def boss_stats(self, n: int, players: int) -> dict:
         b = self.data.bosses
@@ -216,10 +226,13 @@ class Match:
         alive_minions = sum(1 for u in w.units.values() if u.kind == MINION)
         room = max(0, c["max_minions"] - alive_minions)
         sx, sy = camp["spot"]
+        variants = self.g.get("enemy_types") or [{"id": "goblin", "weight": 1}]
+        weights = [v.get("weight", 1) for v in variants]
         for i in range(min(c["size"], room)):
             ang = math.tau * i / c["size"]
+            variant = self.rng.choices(variants, weights=weights, k=1)[0]
             u = w.spawn(MINION, CREEP_TEAM, sx + math.cos(ang) * 30, sy + math.sin(ang) * 30,
-                        home=(sx, sy), **self.minion_stats())
+                        home=(sx, sy), **self.minion_stats(variant))
             camp["uids"].add(u.id)
 
     def _spawn_boss(self, players: int) -> None:
@@ -230,7 +243,15 @@ class Match:
         w.boss_abilities = dict(b["abilities"], index=n,
                                 hp_scale=b["growth"]["hp"] ** (n - 1), dmg_scale=b["growth"]["dmg"] ** (n - 1))
         self._boss_name = b["names"][(n - 1) % len(b["names"])]
+        loot = b.get("loot") or []
+        w.boss_loot = loot[(n - 1) % len(loot)] if loot else None
+        skills = [a["name"] for a in b["abilities"].values()
+                  if isinstance(a, dict) and "unlock" in a and "name" in a and n >= a["unlock"]]
         self.feed.append(f"BOSS #{n}: {self._boss_name} has entered the arena!")
+        if skills:
+            self.feed.append("Skills: " + ", ".join(skills))
+        if w.boss_loot:
+            self.feed.append(f"Drops: {self.data.items[w.boss_loot]['name']}")
 
     # ============================================================ progression
     def xp_needed(self, level: int) -> int:
@@ -257,6 +278,10 @@ class Match:
         item = self.data.items.get(item_id)
         if not p or not item:
             return "Unknown item."
+        if item.get("drop_only"):
+            return "That item only drops from bosses."
+        if item.get("recipe"):
+            return "Craft that item from its recipe components."
         if self.phase != SHOP:
             return "Shop is closed."
         if len(p.items) >= self.g["max_items"]:
@@ -265,6 +290,32 @@ class Match:
             return "Not enough gold."
         p.gold -= item["cost"]
         p.items.append(item_id)
+        return None
+
+    def craft(self, pid: str, item_id: str) -> str | None:
+        """Consume recipe components + combine gold, then add the completed item.
+
+        Components are removed before the result is added, so crafting a 2-part recipe frees one
+        inventory slot. Duplicate components are supported by counting, not by set membership.
+        """
+        p = self.players.get(pid)
+        item = self.data.items.get(item_id)
+        if not p or not item or not item.get("recipe"):
+            return "Unknown recipe."
+        if self.phase != SHOP:
+            return "Crafting is only available in the shop."
+        need = list(item["recipe"])
+        have = list(p.items)
+        for component in need:
+            if component not in have:
+                names = [self.data.items[c]["name"] for c in need]
+                return "Requires: " + " + ".join(names)
+            have.remove(component)
+        fee = int(item.get("combine_cost", 0))
+        if p.gold < fee:
+            return f"Need {fee} gold to combine."
+        p.gold -= fee
+        p.items = have + [item_id]
         return None
 
     def sell(self, pid: str, index: int) -> None:
@@ -341,9 +392,16 @@ class Match:
 
     def _process_deaths(self) -> None:
         w, r = self.world, self.g["rewards"]
-        for _, victim_uid, killer_uid in w.events:
-            v_kind, v_owner = w.registry[victim_uid]
-            k_kind, k_owner = w.registry.get(killer_uid, (None, None)) if killer_uid else (None, None)
+        for ev in list(w.events):
+            if ev[0] == "timeup":
+                self.feed.append("Time's up!")
+                continue
+            if ev[0] == "loot":
+                self._claim_loot(ev[1], ev[2])
+                continue
+            _, victim_uid, killer_uid = ev
+            v_kind, v_owner, v_reward = w.registry[victim_uid]
+            k_kind, k_owner, _ = w.registry.get(killer_uid, (None, None, 1.0)) if killer_uid else (None, None, 1.0)
             killer = self.players.get(k_owner) if k_kind == HERO else None
 
             if v_kind == HERO:
@@ -370,9 +428,47 @@ class Match:
                     self.feed.append(f"{self._boss_name} fell (no hero got the last hit)")
             elif killer:     # minion or boss add
                 m = self.g["minion"]
-                killer.gold += m["gold"]
-                self.give_xp(killer, m["xp"])
+                killer.gold += round(m["gold"] * v_reward)
+                self.give_xp(killer, round(m["xp"] * v_reward))
         w.events.clear()
+
+    # ============================================================ loot
+    def _claim_loot(self, hero_uid: int, pickup_id: int) -> None:
+        w = self.world
+        pk = w.pickups.get(pickup_id)
+        owner = w.registry.get(hero_uid, (None, None, 1.0))[1]
+        p = self.players.get(owner)
+        u = w.units.get(hero_uid)
+        if not pk or pk.kind != "item" or not p or not u or not u.alive:
+            return
+        if len(p.items) >= self.g["max_items"]:
+            if (p.pid, pickup_id) not in self._full_warned:
+                self._full_warned.add((p.pid, pickup_id))
+                self.feed.append(f"{p.name}'s pack is full - can't take {self.data.items[pk.item]['name']}")
+            return
+        p.items.append(pk.item)
+        self._apply_item_live(u, pk.item)
+        w.remove_pickup(pickup_id)
+        self.feed.append(f"{p.name} claimed {self.data.items[pk.item]['name']}!")
+
+    def _apply_item_live(self, u, item_id: str) -> None:
+        """Items picked up mid-fight take effect immediately (shop items apply at spawn instead)."""
+        for k, v in self.data.items[item_id]["stats"].items():
+            if k == "atk_cd_mult":
+                u.atk_cd *= v
+            elif k == "max_hp":
+                u.max_hp += v
+                u.hp += v
+            elif k == "armor":
+                u.armor += v
+            elif k == "dmg":
+                u.dmg += v
+            elif k == "speed":
+                u.speed += v
+            elif k == "spell_power":
+                u.spell_power += v
+            elif k == "lifesteal":
+                u.lifesteal += v
 
     def _respawn_camps(self, dt: float) -> None:
         for camp in self._camps:

@@ -1,10 +1,163 @@
 {
-  "blade":  {"name": "Iron Blade",       "cost": 150, "stats": {"dmg": 12}},
-  "plate":  {"name": "Heavy Plate",      "cost": 150, "stats": {"armor": 6}},
-  "gem":    {"name": "Vital Gem",        "cost": 175, "stats": {"max_hp": 200}},
-  "boots":  {"name": "Swift Boots",      "cost": 120, "stats": {"speed": 40}},
-  "tome":   {"name": "Spell Tome",       "cost": 200, "stats": {"spell_power": 0.25}},
-  "gloves": {"name": "Frenzy Gloves",    "cost": 225, "stats": {"atk_cd_mult": 0.85}},
-  "fang":   {"name": "Bloodthirst Fang", "cost": 250, "stats": {"lifesteal": 0.15}},
-  "heart":  {"name": "Titan Heart",      "cost": 600, "stats": {"max_hp": 500, "armor": 4}}
+  "blade": {
+    "name": "Iron Blade",
+    "cost": 150,
+    "stats": {
+      "dmg": 12
+    }
+  },
+  "plate": {
+    "name": "Heavy Plate",
+    "cost": 150,
+    "stats": {
+      "armor": 6
+    }
+  },
+  "gem": {
+    "name": "Vital Gem",
+    "cost": 175,
+    "stats": {
+      "max_hp": 200
+    }
+  },
+  "boots": {
+    "name": "Swift Boots",
+    "cost": 120,
+    "stats": {
+      "speed": 40
+    }
+  },
+  "tome": {
+    "name": "Spell Tome",
+    "cost": 200,
+    "stats": {
+      "spell_power": 0.25
+    }
+  },
+  "gloves": {
+    "name": "Frenzy Gloves",
+    "cost": 225,
+    "stats": {
+      "atk_cd_mult": 0.85
+    }
+  },
+  "fang": {
+    "name": "Bloodthirst Fang",
+    "cost": 250,
+    "stats": {
+      "lifesteal": 0.15
+    }
+  },
+  "heart": {
+    "name": "Titan Heart",
+    "cost": 600,
+    "stats": {
+      "max_hp": 500,
+      "armor": 4
+    },
+    "recipe": [
+      "gem",
+      "plate"
+    ],
+    "combine_cost": 275
+  },
+  "gorefang": {
+    "name": "Gorehound's Fang",
+    "cost": 500,
+    "drop_only": true,
+    "stats": {
+      "dmg": 20,
+      "lifesteal": 0.12
+    }
+  },
+  "cleaver": {
+    "name": "Butcher's Cleaver",
+    "cost": 600,
+    "drop_only": true,
+    "stats": {
+      "dmg": 30,
+      "atk_cd_mult": 0.88
+    }
+  },
+  "ashheart": {
+    "name": "Ashen Heart",
+    "cost": 700,
+    "drop_only": true,
+    "stats": {
+      "max_hp": 600,
+      "armor": 6
+    }
+  },
+  "mawcrown": {
+    "name": "Maw Crown",
+    "cost": 700,
+    "drop_only": true,
+    "stats": {
+      "spell_power": 0.5,
+      "speed": 25
+    }
+  },
+  "sovereign": {
+    "name": "Sovereign's Brand",
+    "cost": 900,
+    "drop_only": true,
+    "stats": {
+      "dmg": 25,
+      "max_hp": 300,
+      "lifesteal": 0.1,
+      "spell_power": 0.3
+    }
+  },
+  "reaver": {
+    "name": "Duelist Reaver",
+    "cost": 600,
+    "recipe": [
+      "blade",
+      "gloves"
+    ],
+    "combine_cost": 225,
+    "stats": {
+      "dmg": 28,
+      "atk_cd_mult": 0.82
+    }
+  },
+  "archcore": {
+    "name": "Archmage Core",
+    "cost": 600,
+    "recipe": [
+      "tome",
+      "gem"
+    ],
+    "combine_cost": 225,
+    "stats": {
+      "max_hp": 250,
+      "spell_power": 0.45
+    }
+  },
+  "windstep": {
+    "name": "Windstep Greaves",
+    "cost": 550,
+    "recipe": [
+      "boots",
+      "gloves"
+    ],
+    "combine_cost": 205,
+    "stats": {
+      "speed": 70,
+      "atk_cd_mult": 0.88
+    }
+  },
+  "vampedge": {
+    "name": "Vampiric Edge",
+    "cost": 600,
+    "recipe": [
+      "blade",
+      "fang"
+    ],
+    "combine_cost": 200,
+    "stats": {
+      "dmg": 18,
+      "lifesteal": 0.22
+    }
+  }
 }

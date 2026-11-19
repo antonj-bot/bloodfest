@@ -75,7 +75,7 @@ def test_shop_and_items_apply(data, rng):
     base = m.hero_stats(m.players["p0"])
     assert m.buy("p0", "blade") is None
     assert m.hero_stats(m.players["p0"])["dmg"] == base["dmg"] + 12
-    assert m.buy("p0", "heart") == "Not enough gold."
+    assert m.buy("p0", "heart") == "Craft that item from its recipe components."
 
 
 def test_hero_kill_rewards(data, rng):

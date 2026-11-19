@@ -48,6 +48,7 @@ class Room:
         self._task: asyncio.Task | None = None
         self._starting = False
         self._closed = False
+        self._pk_key: tuple | None = None
 
     # ============================================================ membership
     def join(self, ws, name: str, hero: str) -> Client:
@@ -105,6 +106,10 @@ class Room:
             err = m.buy(c.pid, msg["item"])
             if err:
                 await self.send(c, {"t": "err", "msg": err})
+        elif t == "craft" and isinstance(msg.get("item"), str):
+            err = m.craft(c.pid, msg["item"])
+            if err:
+                await self.send(c, {"t": "err", "msg": err})
         elif t == "sell" and isinstance(msg.get("i"), int):
             m.sell(c.pid, msg["i"])
         elif t == "ready":
@@ -160,7 +165,8 @@ class Room:
                 # Fights stream at net_hz; shop / round-end / results only need 1 update per second.
                 due = tick % net_every == 0 if m.phase == FIGHT else tick % self.limits.sim_hz == 0
                 if due or phase_changed:
-                    await self._broadcast_snapshot(scoreboard=phase_changed or tick % (net_every * 10) == 0)
+                    await self._broadcast_snapshot(scoreboard=phase_changed or tick % (net_every * 10) == 0,
+                                                   force_pickups=phase_changed or tick % (self.limits.sim_hz * 5) == 0)
                 last_phase = m.phase
                 if tick % self.limits.sim_hz == 0:
                     await self._kick_idle()
@@ -191,10 +197,14 @@ class Room:
                 await self.leave(c.pid)
 
     # ============================================================ output
-    async def _broadcast_snapshot(self, scoreboard: bool) -> None:
+    async def _broadcast_snapshot(self, scoreboard: bool, force_pickups: bool = False) -> None:
         m = self.match
         fx = m.world.fx if m.world else []
-        shared = protocol.shared_snapshot(m, fx[:20], m.feed[:8], scoreboard)
+        # Pickups are sent only when they change (plus a resync every 5 s) - keeps bandwidth flat.
+        key = (id(m.world), m.world.pk_version if m.world else -1)
+        send_pk = force_pickups or key != self._pk_key
+        self._pk_key = key
+        shared = protocol.shared_snapshot(m, fx[:20], m.feed[:8], scoreboard, with_pickups=send_pk)
         if m.world:
             m.world.fx = []
         m.feed.clear()

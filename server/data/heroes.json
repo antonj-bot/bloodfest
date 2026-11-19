@@ -1,29 +1,350 @@
 {
   "ronin": {
-    "name": "Ronin", "hp": 620, "dmg": 32, "armor": 4, "range": 40, "atk_cd": 0.9, "speed": 215, "radius": 18,
+    "name": "Ronin",
+    "hp": 620,
+    "dmg": 32,
+    "armor": 4,
+    "range": 40,
+    "atk_cd": 0.9,
+    "speed": 215,
+    "radius": 18,
     "skills": {
-      "q": {"name": "Rushing Cut",   "type": "dash",  "cd": 7,  "dist": 260, "dmg": 70,  "hit_r": 80},
-      "w": {"name": "Whirlwind",     "type": "nova",  "cd": 9,  "r": 140, "dmg": 75},
-      "e": {"name": "Iron Will",     "type": "buff",  "cd": 14, "shield": 160, "dur": 4},
-      "r": {"name": "Thousand Cuts", "type": "nova",  "cd": 45, "r": 210, "dmg": 230, "stun": 0.6}
+      "q": {
+        "name": "Rushing Cut",
+        "type": "dash",
+        "cd": 7,
+        "dist": 260,
+        "dmg": 70,
+        "hit_r": 80
+      },
+      "w": {
+        "name": "Whirlwind",
+        "type": "nova",
+        "cd": 9,
+        "r": 140,
+        "dmg": 75
+      },
+      "e": {
+        "name": "Iron Will",
+        "type": "buff",
+        "cd": 14,
+        "shield": 160,
+        "dur": 4
+      },
+      "r": {
+        "name": "Thousand Cuts",
+        "type": "nova",
+        "cd": 45,
+        "r": 210,
+        "dmg": 230,
+        "stun": 0.6
+      }
     }
   },
   "pyro": {
-    "name": "Pyromancer", "hp": 480, "dmg": 26, "armor": 1, "range": 380, "atk_cd": 1.1, "speed": 200, "radius": 16,
+    "name": "Pyromancer",
+    "hp": 480,
+    "dmg": 26,
+    "armor": 1,
+    "range": 380,
+    "atk_cd": 1.1,
+    "speed": 200,
+    "radius": 16,
     "skills": {
-      "q": {"name": "Fireball",   "type": "projectile", "cd": 4,  "dmg": 95,  "speed": 720, "range": 760, "r": 16},
-      "w": {"name": "Flame Ring", "type": "nova",       "cd": 11, "r": 160, "dmg": 60, "stun": 1.0},
-      "e": {"name": "Blink",      "type": "dash",       "cd": 10, "dist": 300, "dmg": 0, "hit_r": 0},
-      "r": {"name": "Meteor",     "type": "projectile", "cd": 50, "dmg": 300, "speed": 480, "range": 900, "r": 34, "aoe": 130}
+      "q": {
+        "name": "Fireball",
+        "type": "projectile",
+        "cd": 4,
+        "dmg": 95,
+        "speed": 720,
+        "range": 760,
+        "r": 16,
+        "visual": "fireball"
+      },
+      "w": {
+        "name": "Flame Ring",
+        "type": "nova",
+        "cd": 11,
+        "r": 160,
+        "dmg": 60,
+        "stun": 1.0
+      },
+      "e": {
+        "name": "Blink",
+        "type": "dash",
+        "cd": 10,
+        "dist": 300,
+        "dmg": 0,
+        "hit_r": 0
+      },
+      "r": {
+        "name": "Meteor",
+        "type": "projectile",
+        "cd": 50,
+        "dmg": 300,
+        "speed": 480,
+        "range": 900,
+        "r": 34,
+        "aoe": 130,
+        "visual": "meteor"
+      }
     }
   },
   "warden": {
-    "name": "Warden", "hp": 820, "dmg": 28, "armor": 8, "range": 50, "atk_cd": 1.2, "speed": 190, "radius": 20,
+    "name": "Warden",
+    "hp": 820,
+    "dmg": 28,
+    "armor": 8,
+    "range": 50,
+    "atk_cd": 1.2,
+    "speed": 190,
+    "radius": 20,
     "skills": {
-      "q": {"name": "Chain Hook",  "type": "projectile", "cd": 9,  "dmg": 55, "speed": 800, "range": 520, "r": 14, "stun": 1.2},
-      "w": {"name": "Ground Slam", "type": "nova",       "cd": 10, "r": 150, "dmg": 55, "stun": 1.0},
-      "e": {"name": "Second Wind", "type": "buff",       "cd": 16, "heal": 220},
-      "r": {"name": "Fortress",    "type": "buff",       "cd": 40, "shield": 450, "dur": 6}
+      "q": {
+        "name": "Chain Hook",
+        "type": "projectile",
+        "cd": 9,
+        "dmg": 55,
+        "speed": 800,
+        "range": 520,
+        "r": 14,
+        "stun": 1.2,
+        "visual": "chain_hook"
+      },
+      "w": {
+        "name": "Ground Slam",
+        "type": "nova",
+        "cd": 10,
+        "r": 150,
+        "dmg": 55,
+        "stun": 1.0
+      },
+      "e": {
+        "name": "Second Wind",
+        "type": "buff",
+        "cd": 16,
+        "heal": 220
+      },
+      "r": {
+        "name": "Fortress",
+        "type": "buff",
+        "cd": 40,
+        "shield": 450,
+        "dur": 6
+      }
+    }
+  },
+  "ranger": {
+    "name": "Storm Ranger",
+    "hp": 540,
+    "dmg": 29,
+    "armor": 2,
+    "range": 430,
+    "atk_cd": 0.95,
+    "speed": 225,
+    "radius": 17,
+    "skills": {
+      "q": {
+        "name": "Piercing Arrow",
+        "type": "pierce",
+        "cd": 4,
+        "dmg": 68,
+        "speed": 1000,
+        "range": 950,
+        "r": 10,
+        "max_hits": 3,
+        "color": "wind",
+        "visual": "arrow"
+      },
+      "w": {
+        "name": "Volley",
+        "type": "cone",
+        "cd": 9,
+        "count": 5,
+        "spread": 0.42,
+        "dmg": 42,
+        "speed": 850,
+        "range": 700,
+        "r": 9,
+        "color": "wind",
+        "visual": "arrow"
+      },
+      "e": {
+        "name": "Tumble",
+        "type": "dash_buff",
+        "cd": 9,
+        "dist": 240,
+        "haste": 0.55,
+        "dur": 3.5,
+        "color": "wind"
+      },
+      "r": {
+        "name": "Heartseeker",
+        "type": "execute",
+        "cd": 44,
+        "dmg": 240,
+        "speed": 1200,
+        "range": 1200,
+        "r": 18,
+        "execute_pct": 0.32,
+        "execute_mult": 2.0,
+        "color": "wind",
+        "visual": "great_arrow"
+      }
+    }
+  },
+  "reaper": {
+    "name": "Night Reaper",
+    "hp": 560,
+    "dmg": 36,
+    "armor": 3,
+    "range": 45,
+    "atk_cd": 0.78,
+    "speed": 230,
+    "radius": 17,
+    "skills": {
+      "q": {
+        "name": "Shadowstep",
+        "type": "teleport_strike",
+        "cd": 6,
+        "dmg": 105,
+        "range": 420,
+        "color": "shadow"
+      },
+      "w": {
+        "name": "Soul Sweep",
+        "type": "drain_nova",
+        "cd": 9,
+        "r": 145,
+        "dmg": 82,
+        "heal_pct": 0.38,
+        "color": "shadow"
+      },
+      "e": {
+        "name": "Wraith Form",
+        "type": "phase",
+        "cd": 14,
+        "dur": 3.0,
+        "speed_mult": 1.35,
+        "color": "shadow"
+      },
+      "r": {
+        "name": "Death Blossom",
+        "type": "pulse_ult",
+        "cd": 46,
+        "r": 210,
+        "dmg": 72,
+        "pulses": 4,
+        "interval": 0.45,
+        "color": "shadow"
+      }
+    }
+  },
+  "druid": {
+    "name": "Wild Druid",
+    "hp": 680,
+    "dmg": 27,
+    "armor": 5,
+    "range": 260,
+    "atk_cd": 1.05,
+    "speed": 205,
+    "radius": 19,
+    "skills": {
+      "q": {
+        "name": "Entangling Roots",
+        "type": "root_projectile",
+        "cd": 6,
+        "dmg": 58,
+        "speed": 700,
+        "range": 680,
+        "r": 15,
+        "root": 1.8,
+        "color": "nature",
+        "visual": "root_seed"
+      },
+      "w": {
+        "name": "Bramble Field",
+        "type": "zone",
+        "cd": 12,
+        "r": 155,
+        "dur": 5.0,
+        "tick": 0.5,
+        "dmg": 24,
+        "slow": 0.45,
+        "color": "nature"
+      },
+      "e": {
+        "name": "Regrowth",
+        "type": "hot",
+        "cd": 14,
+        "heal": 240,
+        "dur": 6.0,
+        "tick": 0.75,
+        "color": "nature"
+      },
+      "r": {
+        "name": "Bear Form",
+        "type": "transform",
+        "cd": 45,
+        "dur": 8.0,
+        "hp_bonus": 320,
+        "dmg_mult": 1.55,
+        "armor_bonus": 5,
+        "speed_mult": 0.92,
+        "color": "nature"
+      }
+    }
+  },
+  "artificer": {
+    "name": "Arc Artificer",
+    "hp": 510,
+    "dmg": 25,
+    "armor": 2,
+    "range": 360,
+    "atk_cd": 1.0,
+    "speed": 200,
+    "radius": 16,
+    "skills": {
+      "q": {
+        "name": "Chain Lightning",
+        "type": "chain",
+        "cd": 5,
+        "dmg": 72,
+        "range": 520,
+        "jumps": 4,
+        "falloff": 0.78,
+        "color": "arc"
+      },
+      "w": {
+        "name": "Shock Mine",
+        "type": "mine",
+        "cd": 10,
+        "r": 105,
+        "arm": 0.6,
+        "dur": 12,
+        "dmg": 125,
+        "stun": 1.0,
+        "color": "arc"
+      },
+      "e": {
+        "name": "Sentry Drone",
+        "type": "drone",
+        "cd": 17,
+        "dur": 9,
+        "range": 360,
+        "dmg": 32,
+        "atk_cd": 0.65,
+        "color": "arc"
+      },
+      "r": {
+        "name": "Arc Laser",
+        "type": "beam",
+        "cd": 48,
+        "range": 900,
+        "width": 55,
+        "dmg": 310,
+        "color": "arc"
+      }
     }
   }
 }

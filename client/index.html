@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Bloodfest Arena</title>
-  <link rel="stylesheet" href="/static/style.css?v=1">
+  <link rel="stylesheet" href="/static/style.css?v=11">
 </head>
 <body>
   <!-- Landing -->
@@ -17,6 +17,10 @@
         <option value="ronin">Ronin (melee, dash, burst)</option>
         <option value="pyro">Pyromancer (ranged, fireballs, meteor)</option>
         <option value="warden">Warden (tank, hook, stuns)</option>
+        <option value="ranger">Storm Ranger (fast ranged marksman)</option>
+        <option value="reaper">Night Reaper (melee assassin)</option>
+        <option value="druid">Wild Druid (healing bruiser)</option>
+        <option value="artificer">Arc Artificer (AoE caster)</option>
       </select>
     </label>
     <button id="btnCreate">Create room</button>
@@ -40,7 +44,7 @@
     <button id="btnStart" class="hidden">Start match</button>
     <p id="lobbyMsg" class="msg">Waiting for the host to start...</p>
     <div class="help">
-      <b>Controls:</b> Right-click to move / attack · Q W E R skills (aim with mouse) · S stop · press K twice to suicide
+      <b>Controls:</b> Right-click to move / attack · A toggles range · Q W E R skills (aim with mouse) · S stop · press K twice to suicide<br><b>Pickups:</b> walk over potions to heal (only when hurt). Boss loot is claimed by whoever touches it first.
     </div>
   </section>
 
@@ -51,13 +55,14 @@
     <div id="feed"></div>
     <table id="score"></table>
     <div id="hud">
-      <div id="stats"><span id="lvl"></span><div class="bar"><i id="xpBar"></i></div><span id="gold"></span></div>
+      <div id="stats"><div class="statHead"><span id="lvl"></span><span id="gold"></span></div><div class="bar"><i id="xpBar"></i></div><div id="combatStats"></div></div>
       <div id="skills"></div>
       <div id="inv"></div>
     </div>
     <div id="shop" class="overlay hidden">
       <h2>Shop <small id="shopTimer"></small></h2>
-      <div id="shopItems"></div>
+      <h3>Components</h3><div id="shopItems"></div>
+      <h3>Recipes <small>own the components, then pay the combine fee</small></h3><div id="shopRecipes"></div>
       <p>Your items (click to sell for half):</p>
       <div id="shopInv"></div>
       <button id="btnReady">Ready</button>
@@ -67,6 +72,6 @@
     <div id="results" class="overlay hidden"></div>
   </section>
 
-  <script src="/static/game.js?v=1"></script>
+  <script src="/static/game.js?v=11"></script>
 </body>
 </html>

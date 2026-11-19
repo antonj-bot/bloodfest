@@ -1,11 +1,10 @@
 from server.game.world import BOSS, BOSS_TEAM, CREEP_TEAM, HERO, MINION, World
 
-STORM = {"start_pct": 0.02, "growth_pct": 0.02, "growth_every_s": 10}
 STATS = dict(radius=15, max_hp=100, dmg=10, armor=0, atk_range=40, atk_cd=1, speed=100)
 
 
 def make(round_s=150):
-    return World(1600, 900, round_s, STORM)
+    return World(1600, 900, round_s)
 
 
 def test_minions_do_not_fight_each_other_but_attack_boss():
@@ -42,14 +41,17 @@ def test_projectile_hits_first_hostile_and_not_owner():
     assert m.hp < m.max_hp
 
 
-def test_storm_guarantees_round_ends():
-    w = make(round_s=1)
-    w.spawn(HERO, "p0", 100, 100, owner="a", **{**STATS, "max_hp": 5000})
-    for _ in range(20 * 120):
+def test_time_limit_ends_the_round_and_nothing_bleeds_before_it():
+    w = make(round_s=5)
+    h = w.spawn(HERO, "p0", 100, 100, owner="a", **{**STATS, "max_hp": 5000})
+    for _ in range(98):                       # 4.9 s: still inside the time limit
         w.step(0.05)
-        if not w.alive_heroes():
-            break
-    assert not w.alive_heroes()
+    assert h.alive and h.hp == h.max_hp and not w.time_up
+    for _ in range(10):
+        w.step(0.05)
+    assert not h.alive and w.time_up
+    assert ("timeup",) in w.events
+    assert sum(1 for e in w.events if e == ("timeup",)) == 1     # announced once, not every tick
 
 
 def test_suicide_has_no_killer():

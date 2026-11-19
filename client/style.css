@@ -22,7 +22,10 @@ table { border-collapse: collapse; width: 100%; } td, th { padding: 2px 6px; tex
 #feed div { background: #000a; margin-bottom: 3px; padding: 2px 6px; border-radius: 4px; }
 #score { position: absolute; top: 10px; right: 10px; width: 270px; background: #000a; border-radius: 8px; font-size: 13px; }
 #hud { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; align-items: center; background: #000b; padding: 8px 12px; border-radius: 10px; }
-#stats { display: flex; flex-direction: column; gap: 4px; min-width: 110px; }
+#stats { display: flex; flex-direction: column; gap: 4px; min-width: 265px; }
+.statHead { display: flex; justify-content: space-between; font-weight: 700; }
+#combatStats { display: grid; grid-template-columns: repeat(3, minmax(72px, 1fr)); gap: 3px 8px; font-size: 11px; }
+#combatStats span { color: #aaa; white-space: nowrap; } #combatStats b { color: #fff; }
 .bar { height: 6px; background: #333; border-radius: 3px; } .bar i { display: block; height: 100%; background: #8e44ad; border-radius: 3px; }
 #gold { color: #f1c40f; font-weight: 700; }
 #skills { display: flex; gap: 6px; }
@@ -31,8 +34,11 @@ table { border-collapse: collapse; width: 100%; } td, th { padding: 2px 6px; tex
 .sk .cd { position: absolute; inset: 0; background: #000c; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; }
 #inv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; font-size: 10px; max-width: 220px; }
 #inv span { background: #2a2230; padding: 2px 4px; border-radius: 4px; }
-.overlay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #1a1520f2; border: 1px solid #5a1d24; border-radius: 10px; padding: 18px; width: min(620px, 94vw); }
-#shopItems, #shopInv { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+.overlay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #1a1520f2; border: 1px solid #5a1d24; border-radius: 10px; padding: 18px; width: min(720px, 94vw); max-height: 92vh; overflow-y: auto; }
+#shopItems, #shopRecipes, #shopInv { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+#shop h3 { margin: 8px 0 5px; font-size: 14px; color: #ddd; } #shop h3 small { color: #888; font-weight: 400; } 
+.item.recipe.ready { border-color: #4bd87b; box-shadow: 0 0 8px #4bd87b55; }
+.parts { color: #bbb; } .owned { color: #65e68e; } .missing { color: #e66; }
 .item { background: #2a2230; border: 1px solid #555; border-radius: 6px; padding: 6px; cursor: pointer; font-size: 12px; }
 .item:hover { border-color: #e23d3d; } .item .c { color: #f1c40f; }
 .banner { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); background: #7a0e0ee6; padding: 10px 18px; border-radius: 8px; font-weight: 800; letter-spacing: 1px; }

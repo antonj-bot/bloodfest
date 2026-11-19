@@ -63,7 +63,10 @@ def create_app(store: Store | None = None, limits: Limits | None = None) -> Fast
                        "skills": {s: {"name": d["name"], "cd": d["cd"], "type": d["type"]}
                                   for s, d in h["skills"].items()}}
                    for k, h in data.heroes.items()},
-        "items": {k: {"name": i["name"], "cost": i["cost"], "stats": i["stats"]} for k, i in data.items.items()},
+        "items": {k: {"name": i["name"], "cost": i["cost"], "stats": i["stats"],
+                       "drop": bool(i.get("drop_only")), "recipe": i.get("recipe"),
+                       "combine": int(i.get("combine_cost", 0))}
+                  for k, i in data.items.items()},
         "arena": data.game["arena"],
         "rounds": data.game["rounds_total"],
         "boss_every": data.game["boss_every"],

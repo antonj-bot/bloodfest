@@ -14,6 +14,7 @@ def test_full_room_stays_well_inside_free_bandwidth(data, limits):
     m.start()
     m.step(m.timer + 0.01)      # round 1 shop -> fight
     sizes = []
+    last_key = None
     dt = 1 / limits.sim_hz
     net_every = max(1, round(limits.sim_hz / limits.net_hz))
     for tick in range(limits.sim_hz * 60):
@@ -23,7 +24,11 @@ def test_full_room_stays_well_inside_free_bandwidth(data, limits):
             m.command(pid, {"t": "cast", "slot": "q", "x": 800, "y": 450})
         m.step(dt)
         if tick % net_every == 0:
-            shared = protocol.shared_snapshot(m, m.world.fx[:20] if m.world else [], [], tick % 100 == 0)
+            key = (id(m.world), m.world.pk_version if m.world else -1)       # same rule the Room uses
+            send_pk = key != last_key or tick % (limits.sim_hz * 5) == 0
+            last_key = key
+            shared = protocol.shared_snapshot(m, m.world.fx[:20] if m.world else [], [], tick % 100 == 0,
+                                              with_pickups=send_pk)
             if m.world:
                 m.world.fx = []
             sizes.extend(len(protocol.snapshot_for(shared, m, p)) for p in m.players.values())
