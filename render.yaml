@@ -1,0 +1,38 @@
+# Render Blueprint: Dashboard -> New -> Blueprint -> pick this repo.
+# FREE-TIER RULES baked in here:
+#   plan: free            -> $0 instance (spins down after 15 min idle; spun-down = no instance hours used)
+#   numInstances: 1       -> rooms live in memory; one free instance only
+#   buildFilter           -> README/test edits don't trigger builds (500 build minutes/month)
+#   healthCheckPath       -> /health never touches Neon, so health checks can't wake the database
+services:
+  - type: web
+    name: bloodfest
+    runtime: python
+    plan: free
+    region: singapore
+    numInstances: 1
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server.main:app --host 0.0.0.0 --port $PORT --ws-per-message-deflate true
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    buildFilter:
+      paths:
+        - server/**
+        - client/**
+        - requirements.txt
+        - render.yaml
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DATABASE_URL
+        sync: false            # paste your Neon connection string when Render asks
+      - key: BF_MONTHLY_EGRESS_GB
+        value: "3.5"           # Render Hobby includes 5 GB/month; we stop at 3.5
+      - key: BF_MONTHLY_DB_SESSIONS
+        value: "1500"          # ~31 CU-hours worst case vs Neon's 100
+      - key: BF_FAIL_CLOSED
+        value: "1"             # can't reach Neon -> can't count usage -> don't start matches
+      - key: BF_MAX_ROOMS
+        value: "2"
+      - key: BF_MAX_PLAYERS
+        value: "6"

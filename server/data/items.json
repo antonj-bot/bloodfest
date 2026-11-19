@@ -1,0 +1,10 @@
+{
+  "blade":  {"name": "Iron Blade",       "cost": 150, "stats": {"dmg": 12}},
+  "plate":  {"name": "Heavy Plate",      "cost": 150, "stats": {"armor": 6}},
+  "gem":    {"name": "Vital Gem",        "cost": 175, "stats": {"max_hp": 200}},
+  "boots":  {"name": "Swift Boots",      "cost": 120, "stats": {"speed": 40}},
+  "tome":   {"name": "Spell Tome",       "cost": 200, "stats": {"spell_power": 0.25}},
+  "gloves": {"name": "Frenzy Gloves",    "cost": 225, "stats": {"atk_cd_mult": 0.85}},
+  "fang":   {"name": "Bloodthirst Fang", "cost": 250, "stats": {"lifesteal": 0.15}},
+  "heart":  {"name": "Titan Heart",      "cost": 600, "stats": {"max_hp": 500, "armor": 4}}
+}

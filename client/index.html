@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bloodfest Arena</title>
+  <link rel="stylesheet" href="/static/style.css?v=1">
+</head>
+<body>
+  <!-- Landing -->
+  <section id="landing" class="panel center">
+    <h1>BLOODFEST <span>ARENA</span></h1>
+    <p class="tag">Free-for-all. Minions bite everyone. A boss every 2 rounds. Last one breathing wins the round.</p>
+    <label>Name <input id="name" maxlength="16" placeholder="Your name"></label>
+    <label>Hero
+      <select id="hero">
+        <option value="ronin">Ronin (melee, dash, burst)</option>
+        <option value="pyro">Pyromancer (ranged, fireballs, meteor)</option>
+        <option value="warden">Warden (tank, hook, stuns)</option>
+      </select>
+    </label>
+    <button id="btnCreate">Create room</button>
+    <button id="btnJoin" class="hidden"></button>
+    <p id="landingMsg" class="msg"></p>
+    <details>
+      <summary>Leaderboard</summary>
+      <table id="leader"></table>
+    </details>
+  </section>
+
+  <!-- Lobby -->
+  <section id="lobby" class="panel center hidden">
+    <h2>Room <span id="roomCode"></span></h2>
+    <div class="share">
+      <input id="shareLink" readonly>
+      <button id="btnCopy">Copy link</button>
+    </div>
+    <ul id="lobbyPlayers"></ul>
+    <label>Hero <select id="lobbyHero"></select></label>
+    <button id="btnStart" class="hidden">Start match</button>
+    <p id="lobbyMsg" class="msg">Waiting for the host to start...</p>
+    <div class="help">
+      <b>Controls:</b> Right-click to move / attack · Q W E R skills (aim with mouse) · S stop · press K twice to suicide
+    </div>
+  </section>
+
+  <!-- Game -->
+  <section id="game" class="hidden">
+    <canvas id="cv"></canvas>
+    <div id="topbar"><span id="roundLbl"></span><span id="timerLbl"></span></div>
+    <div id="feed"></div>
+    <table id="score"></table>
+    <div id="hud">
+      <div id="stats"><span id="lvl"></span><div class="bar"><i id="xpBar"></i></div><span id="gold"></span></div>
+      <div id="skills"></div>
+      <div id="inv"></div>
+    </div>
+    <div id="shop" class="overlay hidden">
+      <h2>Shop <small id="shopTimer"></small></h2>
+      <div id="shopItems"></div>
+      <p>Your items (click to sell for half):</p>
+      <div id="shopInv"></div>
+      <button id="btnReady">Ready</button>
+    </div>
+    <div id="dead" class="banner hidden">YOU ARE DEAD — spectating until the round ends</div>
+    <div id="toast" class="banner small hidden"></div>
+    <div id="results" class="overlay hidden"></div>
+  </section>
+
+  <script src="/static/game.js?v=1"></script>
+</body>
+</html>

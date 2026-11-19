@@ -1,0 +1,26 @@
+{
+  "arena": {"w": 1600, "h": 900},
+  "rounds_total": 10,
+  "boss_every": 2,
+  "shop_seconds": 25,
+  "round_end_seconds": 4,
+  "results_seconds": 15,
+  "round_seconds": 150,
+  "storm": {"start_pct": 0.02, "growth_pct": 0.02, "growth_every_s": 10},
+  "start_gold": 300,
+  "round_gold": 120,
+  "max_items": 6,
+  "leveling": {"max_level": 15, "xp_per_level": 120, "hp": 60, "dmg": 4, "spell_power": 0.08},
+  "rewards": {
+    "hero_kill": {"gold": 100, "gold_per_victim_level": 20, "xp": 110, "points": 2},
+    "survivor_points": 3
+  },
+  "minion": {
+    "hp": 220, "dmg": 14, "armor": 1, "range": 40, "atk_cd": 1.2, "speed": 150, "radius": 14,
+    "aggro": 260, "leash": 500, "gold": 22, "xp": 35, "growth_per_round": 0.15
+  },
+  "camps": {
+    "size": 3, "respawn_s": 25, "max_minions": 24,
+    "spots": [[250, 180], [800, 120], [1350, 180], [250, 720], [800, 780], [1350, 720]]
+  }
+}
