@@ -104,21 +104,27 @@ def create_app(store: Store | None = None, limits: Limits | None = None) -> Fast
         await ws.accept()
         room = rooms.get(code.upper())
         if room is None:
-            await ws.send_text(dumps({"t": "err", "msg": "Room not found. Create a new one."}))
-            await ws.close()
+            await ws.send_text(dumps({"t": "err", "msg": "Room not found or expired. Create a new one."}))
+            await ws.close(code=4001, reason="room not found")
             return
         name = NAME_RE.sub("", ws.query_params.get("name", ""))[:16].strip() or "Player"
         hero = ws.query_params.get("hero", "ronin")
         try:
             client = room.join(ws, name, hero)
         except ValueError as exc:
-            await ws.send_text(dumps({"t": "err", "msg": str(exc)}))
-            await ws.close()
+            msg = str(exc)
+            await ws.send_text(dumps({"t": "err", "msg": msg}))
+            close_code = 4002 if "full" in msg.lower() else 4003 if "start" in msg.lower() or "running" in msg.lower() else 4000
+            await ws.close(code=close_code, reason=msg[:120])
             return
 
         p = room.match.players[client.pid]
         await room.send(client, {"t": "hello", "slot": p.slot, "name": p.name, "code": room.code, **hello_static})
-        await room.broadcast_lobby()
+        if room.match.phase == "lobby":
+            await room.broadcast_lobby()
+        else:
+            await room.send_current_state(client)
+            await room.broadcast_lobby()
         try:
             while True:
                 raw = await ws.receive_text()

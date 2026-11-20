@@ -62,8 +62,6 @@ class Match:
 
     # ============================================================ lobby
     def add_player(self, pid: str, name: str, hero: str) -> Player:
-        if self.phase != LOBBY:
-            raise ValueError("Match already running. Wait for the lobby.")
         if len(self.players) >= self.max_players:
             raise ValueError("Room is full.")
         if hero not in self.data.heroes:
@@ -77,6 +75,21 @@ class Match:
     def set_hero(self, pid: str, hero: str) -> None:
         if self.phase == LOBBY and pid in self.players and hero in self.data.heroes:
             self.players[pid].hero = hero
+
+    def spawn_late_player(self, pid: str) -> None:
+        """Spawn a newly joined player into the current fight; other phases join next round."""
+        p = self.players.get(pid)
+        w = self.world
+        if not p or self.phase != FIGHT or w is None or p.unit_id is not None:
+            return
+        # A small ring around arena center avoids camp edges and keeps joiners visible.
+        angle = (p.slot * 2.399963229728653) % (math.tau)
+        cx, cy = self.g["arena"]["w"] / 2, self.g["arena"]["h"] / 2
+        x, y = cx + math.cos(angle) * 180, cy + math.sin(angle) * 180
+        u = w.spawn(HERO, p.pid, x, y, owner=p.pid, **self.hero_stats(p))
+        p.unit_id = u.id
+        self._alive_prev.add(pid)
+        self.feed.append(f"{p.name} joined the fight")
 
     def remove_player(self, pid: str) -> None:
         p = self.players.get(pid)

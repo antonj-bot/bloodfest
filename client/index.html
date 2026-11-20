@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Bloodfest Arena</title>
-  <link rel="stylesheet" href="/static/style.css?v=11">
+  <link rel="stylesheet" href="/static/style.css?v=13">
 </head>
 <body>
   <!-- Landing -->
@@ -24,7 +24,12 @@
       </select>
     </label>
     <button id="btnCreate">Create room</button>
-    <button id="btnJoin" class="hidden"></button>
+    <div class="joinBox">
+      <label>Room code or invite link
+        <input id="roomInput" maxlength="180" autocomplete="off" placeholder="Example: SZM6W or paste the invite link">
+      </label>
+      <button id="btnJoin" type="button">Join room</button>
+    </div>
     <p id="landingMsg" class="msg"></p>
     <details>
       <summary>Leaderboard</summary>
@@ -72,6 +77,6 @@
     <div id="results" class="overlay hidden"></div>
   </section>
 
-  <script src="/static/game.js?v=11"></script>
+  <script src="/static/game.js?v=13"></script>
 </body>
 </html>

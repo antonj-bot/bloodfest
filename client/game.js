@@ -16,12 +16,17 @@
   // ---------------------------------------------------------------- landing
   $("name").value = localStorage.getItem("bf_name") || "";
   $("hero").value = localStorage.getItem("bf_hero") || "ronin";
-  const roomParam = (params.get("room") || "").toUpperCase();
-  if (roomParam) {
-    $("btnJoin").textContent = `Join room ${roomParam}`;
-    $("btnJoin").classList.remove("hidden");
-  }
-  $("btnJoin").onclick = () => connect(roomParam);
+  const roomParam = normalizeRoom(params.get("room") || "");
+  $("roomInput").value = roomParam;
+  if (roomParam) $("btnJoin").textContent = `Join room ${roomParam}`;
+  $("roomInput").addEventListener("input", () => {
+    const code = normalizeRoom($("roomInput").value);
+    $("btnJoin").textContent = code ? `Join room ${code}` : "Join room";
+  });
+  $("roomInput").addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") { ev.preventDefault(); joinFromLanding(); }
+  });
+  $("btnJoin").addEventListener("click", joinFromLanding);
   $("btnCreate").onclick = async () => {
     try {
       const r = await fetch("/api/rooms", { method: "POST" });
@@ -38,18 +43,70 @@
   }).catch(() => {});
 
   // ---------------------------------------------------------------- network
+  function normalizeRoom(value) {
+    let raw = String(value || "").trim();
+    if (!raw) return "";
+    try {
+      const url = new URL(raw, location.origin);
+      raw = url.searchParams.get("room") || raw;
+    } catch (_) {}
+    const query = raw.match(/[?&]room=([A-Za-z0-9]+)/i);
+    if (query) raw = query[1];
+    return raw.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 8);
+  }
+
+  function joinFromLanding() {
+    const code = normalizeRoom($("roomInput").value || roomParam);
+    if (!code) {
+      $("landingMsg").textContent = "Paste an invite link or enter the room code first.";
+      $("roomInput").focus();
+      return;
+    }
+    $("roomInput").value = code;
+    history.replaceState(null, "", `?room=${code}`);
+    connect(code);
+  }
+
   function connect(code) {
+    code = normalizeRoom(code);
+    if (!code) { $("landingMsg").textContent = "Invalid room code."; return; }
+    if (S.ws && (S.ws.readyState === WebSocket.OPEN || S.ws.readyState === WebSocket.CONNECTING)) return;
     const name = $("name").value.trim() || "Player";
     const hero = $("hero").value;
     localStorage.setItem("bf_name", name);
     localStorage.setItem("bf_hero", hero);
     const proto = location.protocol === "https:" ? "wss" : "ws";
-    const ws = new WebSocket(`${proto}://${location.host}/ws/${code}?name=${encodeURIComponent(name)}&hero=${hero}`);
+    const url = `${proto}://${location.host}/ws/${code}?name=${encodeURIComponent(name)}&hero=${encodeURIComponent(hero)}`;
+    const ws = new WebSocket(url);
     S.ws = ws;
-    ws.onmessage = (ev) => onMessage(JSON.parse(ev.data));
-    ws.onclose = () => {
-      show("landing");
-      $("landingMsg").textContent = $("landingMsg").textContent || "Disconnected.";
+    const button = $("btnJoin");
+    button.disabled = true;
+    button.textContent = `Connecting to ${code}...`;
+    $("landingMsg").textContent = "Opening multiplayer connection...";
+    const timeout = setTimeout(() => {
+      if (ws.readyState === WebSocket.CONNECTING) ws.close();
+    }, 12000);
+    ws.onopen = () => {
+      clearTimeout(timeout);
+      $("landingMsg").textContent = "Connected. Joining lobby...";
+    };
+    ws.onmessage = (ev) => {
+      const msg = JSON.parse(ev.data);
+      if (msg.t === "err") S.lastSocketError = msg.msg || "Connection rejected.";
+      onMessage(msg);
+    };
+    ws.onerror = () => {
+      $("landingMsg").textContent = "Could not connect. Check the room code, then try again.";
+    };
+    ws.onclose = (ev) => {
+      clearTimeout(timeout);
+      button.disabled = false;
+      button.textContent = `Join room ${code}`;
+      S.ws = null;
+      if (S.phase === "lobby" || S.phase === "fight" || S.phase === "shop") show("landing");
+      const reasons = {4001:"Room not found or expired.", 4002:"This room is full.", 4003:"The match has already started."};
+      $("landingMsg").textContent = S.lastSocketError || reasons[ev.code] || `Disconnected (code ${ev.code}). Try joining again.`;
+      S.lastSocketError = "";
     };
   }
   function send(obj) { if (S.ws && S.ws.readyState === 1) S.ws.send(JSON.stringify(obj)); }

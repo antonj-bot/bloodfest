@@ -54,7 +54,8 @@ class Room:
     def join(self, ws, name: str, hero: str) -> Client:
         name = self._unique_name(name)
         pid = secrets.token_hex(4)
-        self.match.add_player(pid, name, hero)   # raises ValueError if full / running
+        self.match.add_player(pid, name, hero)   # raises ValueError only if full / invalid hero
+        self.match.spawn_late_player(pid)
         c = Client(ws=ws, pid=pid, name=name, tokens=self.limits.max_msgs_per_second)
         self.clients[pid] = c
         self.host = self.host or pid
@@ -212,6 +213,14 @@ class Room:
             p = m.players.get(c.pid)
             if p:
                 await self._send_text(c, protocol.snapshot_for(shared, m, p))
+
+    async def send_current_state(self, c: Client) -> None:
+        """Immediately synchronize one player who joined after the lobby."""
+        m = self.match
+        shared = protocol.shared_snapshot(m, [], m.feed[:8], True, with_pickups=True)
+        p = m.players.get(c.pid)
+        if p:
+            await self._send_text(c, protocol.snapshot_for(shared, m, p))
 
     async def broadcast_lobby(self) -> None:
         m = self.match
