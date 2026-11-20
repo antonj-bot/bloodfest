@@ -1,7 +1,78 @@
-.venv/
+# Bloodfest - Python / FastAPI / Render / Neon
+
+# Python bytecode and caches
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 .pytest_cache/
-local_usage.json
+.mypy_cache/
+.pyright/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Secrets and local environment files
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local runtime and usage data
+local_usage.json
+*.sqlite
+*.sqlite3
+*.db
+
+# Bloodfest one-time installers and patch backups
+install_bloodfest*.py
+fix_*_tests.py
 .installer_backups/
+.*-backups/
+*.bak
+
+# Local helper and export scripts
+export_md.py
+modify_cleanup_for_bloodfest.py
+cleanup.py.bak
+
+# Test, coverage, and temporary output
+.tox/
+.nox/
+.cache/
+coverage.xml
+junit.xml
+*.log
+*.tmp
+*.temp
+
+# Build and packaging output
+build/
+dist/
+*.egg-info/
+.eggs/
+wheelhouse/
+
+# IDE and editor settings
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*~
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Render and Neon notes
+# Keep render.yaml, requirements.txt, and .env.example tracked.
+# DATABASE_URL belongs in Render environment variables, never in Git.
