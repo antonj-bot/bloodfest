@@ -135,5 +135,47 @@
       "gold_mult": 1.25,
       "xp_mult": 1.25
     }
-  ]
+  ],
+  "hook_wars": {
+    "max_players": 10,
+    "kills_to_win": 20,
+    "respawn_seconds": 4,
+    "river_width": 170,
+    "hero_hp": 900,
+    "attack_damage": 70,
+    "armor": 4,
+    "move_speed": 215,
+    "hook": {
+      "cooldown": 4.0,
+      "speed": 1050,
+      "range": 1050,
+      "radius": 19,
+      "damage": 110,
+      "pull_speed": 950,
+      "pull_stun": 1.0,
+      "arrival_stun": 0.55
+    },
+    "blink": {
+      "cooldown": 7.0,
+      "range": 240
+    },
+    "potions": {
+      "spawn_every": 12.0,
+      "ttl": 18.0,
+      "max_alive": 3,
+      "heal": 320,
+      "shield": 220,
+      "refresh_seconds": 3.0
+    },
+    "leveling": {
+      "kills_per_level": 2,
+      "max_level": 6,
+      "range_per_level": 90,
+      "radius_per_level": 3,
+      "damage_per_level": 15,
+      "cooldown_per_level": 0.2,
+      "min_cooldown": 3.0,
+      "vision_radius": 330
+    }
+  }
 }

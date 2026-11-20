@@ -23,7 +23,24 @@
         <option value="artificer">Arc Artificer (AoE caster)</option>
       </select>
     </label>
-    <button id="btnCreate">Create room</button>
+    
+      <!-- PUDGE_WARS_MODE_UI_V2 -->
+      <label for="game-mode">Game mode</label>
+      <select id="game-mode" name="mode">
+        <option value="bloodfest">Bloodfest Arena</option>
+        <option value="hook_wars">Pudge Wars (5v5)</option>
+      </select>
+
+      <label id="bot-count-label" for="bot-count">Practice bots</label>
+      <select id="bot-count" name="bots">
+        <option value="0">No bots</option>
+        <option value="1">1 bot</option>
+        <option value="3">3 bots</option>
+        <option value="5">5 bots</option>
+        <option value="7">7 bots</option>
+        <option value="8">8 bots</option>
+      </select>
+<button id="btnCreate">Create room</button>
     <div class="joinBox">
       <label>Room code or invite link
         <input id="roomInput" maxlength="180" autocomplete="off" placeholder="Example: SZM6W or paste the invite link">

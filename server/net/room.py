@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 from ..budget import Budget, MatchClock
 from ..config import GameData, Limits
 from ..game.match import FIGHT, LOBBY, OVER, Match
+from ..game.hook_wars import HookWarsMatch
 from . import protocol
 
 
@@ -34,13 +35,14 @@ class Client:
 
 
 class Room:
-    def __init__(self, code: str, data: GameData, limits: Limits, budget: Budget, on_empty) -> None:
+    def __init__(self, code: str, data: GameData, limits: Limits, budget: Budget, on_empty, mode: str = "bloodfest") -> None:
         self.code = code
         self.data = data
         self.limits = limits
         self.budget = budget
         self.on_empty = on_empty
-        self.match = Match(data, limits.max_players_per_room)
+        self.mode = mode
+        self.match = HookWarsMatch(data, 10) if mode == "hook_wars" else Match(data, limits.max_players_per_room)
         self.clients: dict[str, Client] = {}
         self.host: str | None = None
         self.match_bytes = 0

@@ -93,4 +93,33 @@ def private_part(match: Match, p: Player) -> str:
 
 
 def snapshot_for(shared: str, match: Match, p: Player) -> str:
+    # Pudge Wars blind-side vision is enforced on the server, not merely covered
+    # by a client overlay. This prevents a modified browser from reading enemy-side
+    # positions from the WebSocket payload.
+    if getattr(match, "mode", "bloodfest") == "hook_wars" and match.world is not None:
+        body = json.loads("{" + shared + "}")
+        mid = match.world.mid
+        river_half = match.world.river_w / 2
+        left_team = p.slot % 2 == 0
+        visible_edge = mid + river_half if left_team else mid - river_half
+
+        own = match.world.units.get(p.unit_id) if p.unit_id else None
+        vision_radius = float(match.cfg.get("leveling", {}).get("vision_radius", 330))
+
+        def visible_point(x, y):
+            on_home_bank = x <= visible_edge if left_team else x >= visible_edge
+            near_player = bool(own and math.hypot(x-own.x, y-own.y) <= vision_radius)
+            return on_home_bank or near_player
+
+        # A player dragged into enemy territory retains a local vision bubble. This
+        # reveals nearby enemies, hooks and potions to that player without exposing
+        # the full enemy bank. Unit packet x/y = 2/3; projectile x/y = 0/1.
+        body["u"] = [u for u in body.get("u", []) if len(u) > 3 and visible_point(u[2], u[3])]
+        body["pr"] = [q for q in body.get("pr", []) if len(q) > 1 and visible_point(q[0], q[1])]
+        if "pk" in body:
+            body["pk"] = [q for q in body["pk"] if len(q) > 3 and visible_point(q[2], q[3])]
+        # Combat effects can reveal hidden casts/impacts, so suppress them in this
+        # mode. Feed and scoreboard remain visible because team score is public.
+        body.pop("fx", None)
+        shared = dumps(body)[1:-1]
     return '{"t":"s",' + shared + ',"me":' + private_part(match, p) + "}"

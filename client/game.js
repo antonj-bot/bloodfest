@@ -29,7 +29,7 @@
   $("btnJoin").addEventListener("click", joinFromLanding);
   $("btnCreate").onclick = async () => {
     try {
-      const r = await fetch("/api/rooms", { method: "POST" });
+      const r = await fetch("/api/rooms?mode=" + encodeURIComponent(document.getElementById("game-mode").value) + "&bots=" + encodeURIComponent(document.getElementById("game-mode").value === "hook_wars" ? document.getElementById("bot-count").value : "0"), { method: "POST" });
       const j = await r.json();
       if (!r.ok) throw new Error(j.detail || "Could not create room");
       history.replaceState(null, "", `?room=${j.code}`);
@@ -691,3 +691,121 @@
   }
   function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 })();
+
+// HOOK_WARS_MODE_V1: selector and river overlay are additive, preserving the existing UI.
+
+// PUDGE_WARS_ABILITIES_POTIONS_V1
+(() => {
+  const originalParse=JSON.parse.bind(JSON);
+  let mode=false;
+  function ensureHud(){
+    let hud=document.getElementById("pudge-skill-hud");
+    if(!mode){if(hud)hud.remove();return;}
+    if(hud)return;
+    hud=document.createElement("div");hud.id="pudge-skill-hud";
+    hud.innerHTML='<div class="pudge-title">PUDGE WARS</div><div class="pudge-skills"><div class="pudge-skill" id="pudge-q"><b>Q</b><span>MEAT HOOK<small>Pull an enemy across the river</small></span><i></i></div><div class="pudge-skill" id="pudge-e"><b>E</b><span>BLINK<small>Short teleport on your bank</small></span><i></i></div></div><div class="pudge-potions">⚗ Random potions: Heal • Iron Skin • Arcane Refresh</div>';
+    document.body.appendChild(hud);
+  }
+  function cooldown(id,t){const el=document.getElementById(id);if(!el)return;el.classList.toggle("cooling",t>0);el.querySelector("i").textContent=t>0?(t/10).toFixed(1):"READY";}
+  JSON.parse=function(...args){const obj=originalParse(...args);
+    if(obj&&obj.t==="hello"&&obj.mode){mode=obj.mode==="hook_wars";ensureHud();}
+    if(mode&&obj&&obj.t==="s"&&Array.isArray(obj.me)){cooldown("pudge-q",obj.me[4]||0);cooldown("pudge-e",obj.me[6]||0);}
+    return obj;
+  };
+})();
+
+// PUDGE_WARS_POLISH_V3
+(() => {
+  let active=false, left=true, projectiles=[], trails=new Map();
+  const parseBeforePolish=JSON.parse.bind(JSON);
+  let fog, trail, ctx;
+
+  function gameCanvas(){
+    return [...document.querySelectorAll("canvas")].find(c => c.id !== "pudge-hook-trails");
+  }
+  function ensureLayers(){
+    fog=document.getElementById("pudge-fog");
+    if(!fog){fog=document.createElement("div");fog.id="pudge-fog";fog.innerHTML='<div class="fog-edge"></div><span>UNKNOWN TERRITORY</span>';document.body.appendChild(fog);}
+    trail=document.getElementById("pudge-hook-trails");
+    if(!trail){trail=document.createElement("canvas");trail.id="pudge-hook-trails";document.body.appendChild(trail);}
+    ctx=trail.getContext("2d");
+  }
+  function syncLayout(){
+    ensureLayers();
+    const game=gameCanvas();
+    if(!active||!game){fog.hidden=true;trail.hidden=true;return null;}
+    const r=game.getBoundingClientRect(), half=r.width/2;
+    fog.hidden=false;trail.hidden=false;
+    fog.className=left?"enemy-right":"enemy-left";
+    fog.style.top=r.top+"px";fog.style.height=r.height+"px";fog.style.width=half+"px";
+    fog.style.left=(left?r.left+half:r.left)+"px";
+    trail.style.left=r.left+"px";trail.style.top=r.top+"px";trail.style.width=r.width+"px";trail.style.height=r.height+"px";
+    const w=Math.max(1,game.width||Math.round(r.width)),h=Math.max(1,game.height||Math.round(r.height));
+    if(trail.width!==w||trail.height!==h){trail.width=w;trail.height=h;trails.clear();}
+    const hud=document.getElementById("pudge-skill-hud");
+    if(hud){hud.classList.add("pudge-v3");hud.classList.remove("pudge-polished");}
+    return {w,h};
+  }
+  JSON.parse=function(...args){
+    const o=parseBeforePolish(...args);
+    if(o&&o.t==="hello"){
+      active=o.mode==="hook_wars";left=(o.slot%2===0);
+      requestAnimationFrame(syncLayout);
+    }
+    if(active&&o&&o.t==="s")projectiles=Array.isArray(o.pr)?o.pr:[];
+    return o;
+  };
+  function drawHook(c,x,y,points){
+    if(points.length>1){
+      c.save();c.lineCap="round";c.lineJoin="round";
+      for(let layer=0;layer<3;layer++){
+        c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));
+        c.strokeStyle=layer===0?"rgba(255,55,35,.20)":layer===1?"rgba(34,18,16,.92)":"#e8d7bd";
+        c.lineWidth=layer===0?18:layer===1?8:3;c.shadowColor=layer===0?"#ff4228":"transparent";c.shadowBlur=layer===0?18:0;c.stroke();
+      }
+      c.setLineDash([2,10]);c.strokeStyle="rgba(255,255,255,.65)";c.lineWidth=2;c.stroke();c.setLineDash([]);c.restore();
+    }
+    c.save();c.translate(x,y);c.shadowColor="#ff4d2d";c.shadowBlur=20;
+    const g=c.createRadialGradient(0,0,2,0,0,22);g.addColorStop(0,"#fff8df");g.addColorStop(.24,"#ffca73");g.addColorStop(.55,"#de3d24");g.addColorStop(1,"rgba(142,22,12,0)");
+    c.fillStyle=g;c.beginPath();c.arc(0,0,22,0,Math.PI*2);c.fill();
+    c.shadowBlur=5;c.strokeStyle="#f3e7d5";c.lineWidth=5;c.beginPath();c.arc(0,0,9,.2,Math.PI*1.65);c.lineTo(7,13);c.stroke();c.restore();
+  }
+  function frame(){
+    const size=syncLayout();
+    if(!size||!ctx){requestAnimationFrame(frame);return;}
+    ctx.clearRect(0,0,size.w,size.h);const now=performance.now(),seen=new Set();
+    projectiles.forEach((p,i)=>{
+      if(!p||p.length<2)return;const x=p[0]/1600*size.w,y=p[1]/900*size.h,key=i+":"+(p[5]||"");seen.add(key);
+      const arr=trails.get(key)||[];arr.push({x,y,t:now});while(arr.length>18||arr[0].t<now-420)arr.shift();trails.set(key,arr);drawHook(ctx,x,y,arr);
+    });
+    for(const [k,v] of trails)if(!seen.has(k)&&(!v.length||v[v.length-1].t<now-450))trails.delete(k);
+    requestAnimationFrame(frame);
+  }
+  addEventListener("resize",syncLayout);ensureLayers();requestAnimationFrame(frame);
+})();
+
+// PUDGE_WARS_LEVELS_DYNAMIC_VISION_V1
+(() => {
+  let active=false, slot=-1, ownId=null, level=1, x=0, y=0;
+  const previousParse=JSON.parse.bind(JSON);
+  function updateVision(){
+    const fog=document.getElementById("pudge-fog"),game=[...document.querySelectorAll("canvas")].find(c=>c.id!=="pudge-hook-trails");
+    if(!active||!fog||!game||!ownId)return;
+    const r=game.getBoundingClientRect(),px=x/1600*r.width,py=y/900*r.height;
+    const localX=px-(parseFloat(fog.style.left||"0")-r.left),localY=py;
+    fog.style.setProperty("--vision-x",localX+"px");fog.style.setProperty("--vision-y",localY+"px");
+    fog.classList.toggle("player-displaced",(slot%2===0&&x>800)||(slot%2===1&&x<800));
+    const title=document.querySelector("#pudge-skill-hud .pudge-title");if(title)title.textContent=`PUDGE WARS • HOOK LV ${level}`;
+  }
+  JSON.parse=function(...args){const o=previousParse(...args);
+    if(o&&o.t==="hello"){active=o.mode==="hook_wars";slot=o.slot;}
+    if(active&&o&&o.t==="s"){
+      if(Array.isArray(o.me)){ownId=o.me[0];level=o.me[2]||1;}
+      const me=Array.isArray(o.u)?o.u.find(u=>u[0]===ownId):null;if(me){x=me[2];y=me[3];}
+      requestAnimationFrame(updateVision);
+    }return o;
+  };
+})();
+
+// PUDGE_WARS_BANK_LOCK_BOTS_V3
+addEventListener("DOMContentLoaded",()=>{const mode=document.getElementById("game-mode"),bots=document.getElementById("bot-count"),label=document.getElementById("bot-count-label");if(!mode||!bots)return;const sync=()=>{const show=mode.value==="hook_wars";bots.hidden=!show;if(label)label.hidden=!show;};mode.addEventListener("change",sync);sync();});

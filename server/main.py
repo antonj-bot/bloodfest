@@ -90,13 +90,19 @@ def create_app(store: Store | None = None, limits: Limits | None = None) -> Fast
         return budget.leaderboard
 
     @app.post("/api/rooms")
-    async def create_room():
+    async def create_room(mode: str = "bloodfest", bots: int = 0):
+        if mode not in {"bloodfest", "hook_wars"}:
+            raise HTTPException(400, "Unknown game mode.")
         if len(rooms) >= limits.max_rooms:
             raise HTTPException(503, "All rooms are busy. Try again later.")
         if budget.egress_exhausted():
             raise HTTPException(503, "Monthly bandwidth budget reached.")
         code = "".join(secrets.choice(ROOM_ALPHABET) for _ in range(5))
-        rooms[code] = Room(code, data, limits, budget, on_empty=lambda c: rooms.pop(c, None))
+        rooms[code] = Room(code, data, limits, budget, on_empty=lambda c: rooms.pop(c, None), mode=mode)
+        if mode == "hook_wars":
+            bots = max(0, min(8, int(bots)))
+            for i in range(bots):
+                rooms[code].match.add_bot("radiant" if i % 2 == 0 else "dire")
         return {"code": code}
 
     @app.websocket("/ws/{code}")
@@ -119,7 +125,7 @@ def create_app(store: Store | None = None, limits: Limits | None = None) -> Fast
             return
 
         p = room.match.players[client.pid]
-        await room.send(client, {"t": "hello", "slot": p.slot, "name": p.name, "code": room.code, **hello_static})
+        await room.send(client, {"t": "hello", "slot": p.slot, "name": p.name, "code": room.code, "mode": room.mode, **hello_static})
         if room.match.phase == "lobby":
             await room.broadcast_lobby()
         else:
